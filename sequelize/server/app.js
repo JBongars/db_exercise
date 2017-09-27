@@ -91,9 +91,10 @@ app.get("/api/products/sum", function (req, res) {
 	Groceries.count()
 		.then(function (result) {
 			console.log(result);
-			res.json(result);
+			res.status(200).send(result);
 		}).catch(function (error) {
 			console.log(error);
+			res.status(400).json(error);
 		});
 });
 
@@ -111,7 +112,7 @@ app.get("/api/products/exist/:upc12", function (req, res) {
 		})
 		.then(function (result) {
 			console.log(result[0]);
-			res.json(result[0]);
+			res.json(result.dataValues);
 		}).catch(function (error) {
 			console.log(error);
 		});
@@ -119,14 +120,15 @@ app.get("/api/products/exist/:upc12", function (req, res) {
 
 app.get("/api/products/:productId", function (req, resp) {
 	console.log(" get Grocery  ");
+	console.log(req.params.productId)
 
 	Groceries
 		.findOne({
 			where: { id: parseInt(req.params.productId) }
 		})
 		.then(function (result) {
-			console.log(result);
-			resp.json(result[0]);
+			console.log(result[0]);
+			resp.json(result.dataValues);
 		}).catch(function (error) {
 			console.log(error);
 		});
@@ -144,7 +146,7 @@ app.put("/api/products/:productId", function (req, resp) {
 		)
 		.then(function (result) {
 			console.log(result);
-			resp.json(result[0]);
+			resp.json(result.dataValues);
 		}).catch(function (error) {
 			console.log(error);
 		});
@@ -160,7 +162,7 @@ app.post("/api/products/", function (req, resp) {
 	})
 		.then(function (result) {
 			console.log(result);
-			resp.json(result[0]);
+			resp.json(result.dataValues);
 		}).catch(function (error) {
 			console.log(error);
 		});
@@ -178,7 +180,7 @@ app.delete("/api/products/:productId", function (req, resp) {
 	  })
 		.then(function (result) {
 			console.log(result);
-			resp.json(result[0]);
+			resp.json(result.dataValues);
 		}).catch(function (error) {
 			console.log(error);
 		});
