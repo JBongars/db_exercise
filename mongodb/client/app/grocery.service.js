@@ -8,15 +8,20 @@
     function GroceryService($http, $q) {
         var vm = this;
 
-        vm.sum = function () {
+        vm.sum = function (searchType, keyword) {
+            console.log("searchType: ", searchType);
+            console.log("keyword: ", keyword);
+            var params = {
+                searchType: searchType,
+                keyword: keyword
+            }
+
             var defer = $q.defer();
-            $http.get("/api/products/sum")
+            $http.get("/api/products/sum", {params: params})
                 .then(function (result) {
-                    console.log("count: ", result);
                     defer.resolve(result.data);
                 })
                 .catch(function (err) {
-                    console.error("noCount: ", result);
                     defer.reject(err);
                 });
 

@@ -26,7 +26,7 @@
             GroceryService.search(vm.searchType, vm.keyword, vm.sortBy, vm.itemsPerPage, vm.currentPage)
                 .then(function (products) {
                     vm.products = products;
-                    GroceryService.sum().then(function(result){
+                    GroceryService.sum(vm.searchType, vm.keyword).then(function(result){
                         console.log(result);
                         vm.totalItems = result;
                     });
@@ -46,7 +46,7 @@
                     .then(function (products) {
                         console.log("products", products);
                         vm.products = products;
-                        GroceryService.sum().then(function(result){
+                        GroceryService.sum(searchType, keyword).then(function(result){
                             console.log("sum: ", result);
                             vm.totalItems = result;
                         });
@@ -65,7 +65,7 @@
             .then(function (products) {
                 console.log("----- refresh list ");
                 vm.products = products;
-                GroceryService.sum().then(function(result){
+                GroceryService.sum(vm.searchType, vm.keyword).then(function(result){
                     console.log(result);
                     vm.totalItems = result;
                 });
