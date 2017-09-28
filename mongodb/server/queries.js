@@ -14,14 +14,14 @@ module.exports = function (app, conn) {
         var where = {}
         
         console.log("keyword: ", req.query.keyword);
-        console.log("searchType: ", req.query.searchType);
+        console.log("!!!searchType: ", req.query.searchType);
 
         //if (req.query.keyword) var where = null;
         if (req.query.keyword == '') var where = null;
         else if (req.query.searchType) {
             or = [];
-            if(req.query.searchType == 'Brand') or.push({brand: "/" + req.query.keyword + "/"});
-            if(req.query.searchType == 'Name') or.push({name: "/" + req.query.keyword + "/"});
+            if(req.query.searchType.includes('Brand')) or.push({brand: "/" + req.query.keyword + "/"});
+            if(req.query.searchType.includes('Name')) or.push({name: "/" + req.query.keyword + "/"});
             var where = {
                 $or: or
             }
@@ -35,7 +35,7 @@ module.exports = function (app, conn) {
         */
 
         console.log("[", (new Date).toTimeString(), "]");
-        console.log("search for ", where);
+        console.log("search for ", or);
         console.log("limit: %s, sort: %s, skip: %s", limit, sortBy, offset)
 
         grocery_list.find(where)
@@ -43,7 +43,7 @@ module.exports = function (app, conn) {
             .sort({order: sortBy})
             .skip(offset)
             .toArray(function (err, result) {
-                //console.log(result ? result : err);
+                console.log(result ? result : err);
                 if (err) res.status(400).json(err);
                 else if (result) res.status(200).json(result);
                 else res.status(400).send("no records found...");

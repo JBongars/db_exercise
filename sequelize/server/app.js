@@ -49,17 +49,17 @@ app.get("/api/products", function (req, resp) {
 	var sortBy = req.query.sortBy || 'ASC';
 	var order = 'name ' + sortBy;
 
-	if (req.query.keyword) var where = {};
+	if (req.query.keyword == '') var where = {};
 	else if (req.query.searchType) {
-		var brand = req.query.searchType == 'Brand' ? "%" + req.query.keyword + "%" : "%";
-		var name = req.query.searchType == 'Name' ? "%" + req.query.keyword + "%" : "%";
+		or = [];
+		if(req.query.searchType.includes('Brand')) or.push({brand: {$like: "%" + req.query.keyword + "%" }});
+		if(req.query.searchType.includes('Name')) or.push({name: {$like: "%" + req.query.keyword + "%" }});
 		var where = {
-			$or: [
-				{ brand: { $like: brand  } },
-				{ name: { $like: name } }
-			]
+			$or: or
 		}
 	}
+
+	console.log(where);
 
 	/*
 		"SELECT * FROM grocery_list WHERE brand like '%"
@@ -136,13 +136,18 @@ app.get("/api/products/:productId", function (req, resp) {
 
 app.put("/api/products/:productId", function (req, resp) {
 	console.log(" update Grocery  ");
+	console.log("id: ", parseInt(req.params.productId) );
 
 	Groceries
 		.update(
-		{ upc12: parseInt(req.body.upc12) },
-		{ brand: req.body.brand },
-		{ name: req.body.name },
-		{ where: { id: parseInt(req.params.productId) } }
+		{ 
+			upc12: parseInt(req.body.upc12), 
+			brand: req.body.brand, 
+			name: req.body.name
+		},
+		{
+			where: { id: parseInt(req.params.productId) }
+		}
 		)
 		.then(function (result) {
 			console.log(result);
