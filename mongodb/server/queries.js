@@ -11,17 +11,19 @@ module.exports = function (app, conn) {
         var limit = items;
         var sortBy = req.query.sortBy == 'ASC' ? 1 : -1;
         var order = 'name ' + sortBy;
+        var where = {}
+        
+        console.log("keyword: ", req.query.keyword);
+        console.log("searchType: ", req.query.searchType);
 
-        console.log(true && req.query.keyword);
-        if (req.query.keyword) var where = null;
+        //if (req.query.keyword) var where = null;
+        if (req.query.keyword == '') var where = null;
         else if (req.query.searchType) {
-            var brand = req.query.searchType == 'Brand' ? "/" + req.query.keyword + "/" : "/";
-            var name = req.query.searchType == 'Name' ? "/" + req.query.keyword + "/" : "/";
+            or = [];
+            if(req.query.searchType == 'Brand') or.push({brand: "/" + req.query.keyword + "/"});
+            if(req.query.searchType == 'Name') or.push({name: "/" + req.query.keyword + "/"});
             var where = {
-                $or: [
-                    { brand: brand },
-                    { name: name }
-                ]
+                $or: or
             }
         }
 
@@ -32,14 +34,19 @@ module.exports = function (app, conn) {
             + ' OFFSET ' + offset;
         */
 
-        grocery_list.find({ where })
+        console.log("[", (new Date).toTimeString(), "]");
+        console.log("search for ", where);
+        console.log("limit: %s, sort: %s, skip: %s", limit, sortBy, offset)
+
+        grocery_list.find(where)
             .limit(limit)
-            .sort({ order: sortBy })
+            .sort({order: sortBy})
             .skip(offset)
             .toArray(function (err, result) {
-                console.log(result ? result : err);
+                //console.log(result ? result : err);
                 if (err) res.status(400).json(err);
-                res.status(200).json(result);
+                else if (result) res.status(200).json(result);
+                else res.status(400).send("no records found...");
             });
     });
 
@@ -47,10 +54,11 @@ module.exports = function (app, conn) {
         console.log("sum of all Groceries");
 
         grocery_list.count()
-            .then(function (err, result) {
+            .then(function (result, err) {
                 console.log(result ? result : err);
-                if (err) res.status(400).send(err);
-                res.status(200).send(result);
+                if (err) res.status(400).json(err);
+                else if (result) res.status(200).send(result.toString());
+                else res.status(400).send("no records found...");
             });
     });
 
@@ -61,7 +69,8 @@ module.exports = function (app, conn) {
             .then(function (err, result) {
                 console.log(result ? result : err);
                 if (err) res.status(400).send(err);
-                res.status(200).json(result);
+                else if (result) res.status(200).json(result);
+                else res.status(400).send("no records found...");
             });
     });
 
@@ -70,9 +79,12 @@ module.exports = function (app, conn) {
 
         grocery_list.findOne({ id: req.params.productId })
             .then(function (err, result) {
+                console.log("error: ", err);
+                console.log("result: ", res);
                 console.log(result ? result : err);
                 if (err) res.status(400).send(err);
-                res.status(200).json(result);
+                else if (result) res.status(200).json(result);
+                else res.status(400).send("no records found...");
             });
     });
 
@@ -92,7 +104,8 @@ module.exports = function (app, conn) {
             .then(function (err, result) {
                 console.log(result ? result : err);
                 if (err) res.status(400).send(err);
-                res.status(200).json(result);
+                else if (result) res.status(200).json(result);
+                else res.status(400).send("no records found...");
             });
     });
 
@@ -107,7 +120,8 @@ module.exports = function (app, conn) {
             .then(function (err, result) {
                 console.log(result ? result : err);
                 if (err) res.status(400).send(err);
-                res.status(200).json(result);
+                else if (result) res.status(200).json(result);
+                else res.status(400).send("no records found...");
             });
     });
 
@@ -121,7 +135,8 @@ module.exports = function (app, conn) {
             .then(function (err, result) {
                 console.log(result ? result : err);
                 if (err) res.status(400).send(err);
-                res.status(200).json(result);
+                else if (result) res.status(200).json(result);
+                else res.status(400).send("no records found...");
             });
     });
 }

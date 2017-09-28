@@ -91,7 +91,7 @@ app.get("/api/products/sum", function (req, res) {
 	Groceries.count()
 		.then(function (result) {
 			console.log(result);
-			res.status(200).send(result);
+			res.status(200).send(result.toString());
 		}).catch(function (error) {
 			console.log(error);
 			res.status(400).json(error);

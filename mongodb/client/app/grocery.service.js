@@ -12,9 +12,11 @@
             var defer = $q.defer();
             $http.get("/api/products/sum")
                 .then(function (result) {
+                    console.log("count: ", result);
                     defer.resolve(result.data);
                 })
                 .catch(function (err) {
+                    console.error("noCount: ", result);
                     defer.reject(err);
                 });
 

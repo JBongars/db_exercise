@@ -1,0 +1,5 @@
+mongodb/node_modules
+mongodb/client/bower_components
+sequelize/node_modules
+sequelize/client/bower_components
+database/mongodb
