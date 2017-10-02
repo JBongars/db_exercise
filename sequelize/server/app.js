@@ -52,8 +52,8 @@ app.get("/api/products", function (req, resp) {
 	if (req.query.keyword == '') var where = {};
 	else if (req.query.searchType) {
 		or = [];
-		if(req.query.searchType.includes('Brand')) or.push({brand: {$like: "%" + req.query.keyword + "%" }});
-		if(req.query.searchType.includes('Name')) or.push({name: {$like: "%" + req.query.keyword + "%" }});
+		if (req.query.searchType.includes('Brand')) or.push({ brand: { $like: "%" + req.query.keyword + "%" } });
+		if (req.query.searchType.includes('Name')) or.push({ name: { $like: "%" + req.query.keyword + "%" } });
 		var where = {
 			$or: or
 		}
@@ -87,13 +87,27 @@ app.get("/api/products", function (req, resp) {
 
 app.get("/api/products/sum", function (req, res) {
 	console.log("sum of all Groceries");
+	console.log("keyword: ", req.query.keyword);
+	console.log("searchType: ", req.query.searchType);
 
-	Groceries.count()
+	if (req.query.keyword == '') var where = null;
+	else if (req.query.searchType) {
+		or = [];
+		if (req.query.searchType.includes('Brand')) or.push({ brand: { $like: "%" + req.query.keyword + "%" } });
+		if (req.query.searchType.includes('Name')) or.push({ name: { $like: "%" + req.query.keyword + "%" } });
+		var where = {
+				$or: or
+		}
+	}
+
+	console.log("where: ", JSON.stringify(where));
+
+	Groceries.findAndCountAll({where: where})
 		.then(function (result) {
-			console.log(result);
-			res.status(200).send(result.toString());
+			console.log(result.count);
+			res.status(200).send(result.count.toString());
 		}).catch(function (error) {
-			console.log(error);
+			//console.log(error);
 			res.status(400).json(error);
 		});
 });
@@ -136,13 +150,13 @@ app.get("/api/products/:productId", function (req, resp) {
 
 app.put("/api/products/:productId", function (req, resp) {
 	console.log(" update Grocery  ");
-	console.log("id: ", parseInt(req.params.productId) );
+	console.log("id: ", parseInt(req.params.productId));
 
 	Groceries
 		.update(
-		{ 
-			upc12: parseInt(req.body.upc12), 
-			brand: req.body.brand, 
+		{
+			upc12: parseInt(req.body.upc12),
+			brand: req.body.brand,
 			name: req.body.name
 		},
 		{
@@ -180,9 +194,9 @@ app.delete("/api/products/:productId", function (req, resp) {
 
 	Groceries.destroy({
 		where: {
-		  id: parseInt(req.params.productId)
+			id: parseInt(req.params.productId)
 		}
-	  })
+	})
 		.then(function (result) {
 			console.log(result);
 			resp.json(result.dataValues);

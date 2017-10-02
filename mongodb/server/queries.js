@@ -12,19 +12,20 @@ module.exports = function (app, conn) {
         var sortBy = req.query.sortBy == 'ASC' ? 1 : -1;
         var order = 'name ' + sortBy;
         var where = {}
+        var query = (req.query.keyword).replace(new RegExp(' ', 'g'), '*');
+        var searchType = req.query.searchType || ['Brand', 'Name'];
+
+        console.log(query);
 
         //console.log("keyword: ", req.query.keyword);
         //console.log("!!!searchType: ", req.query.searchType);
 
         //if (req.query.keyword) var where = null;
-        if (req.query.keyword == '') var where = null;
-        else if (req.query.searchType) {
-            or = [];
-            if (req.query.searchType.includes('Brand')) or.push({ brand: "/" + req.query.keyword + "/" });
-            if (req.query.searchType.includes('Name')) or.push({ name: "/" + req.query.keyword + "/" });
-            var where = {
-                $or: or
-            }
+        if (req.query.keyword == '' || req.query.searchType == '') var where = null;
+        else {
+            var or = {$or : []};
+            if (searchType.includes('Brand')) or.$or.push({"brand" : new RegExp(query, 'i')});
+            if (searchType.includes('Name')) or.$or.push({"name" : new RegExp(query, 'i')});
         }
 
         /*
@@ -32,13 +33,10 @@ module.exports = function (app, conn) {
             + brand + "%' OR name like '%"
             + name + "%' " + " ORDER BY " + order + " LIMIT " + limit
             + ' OFFSET ' + offset;
-        */
+        */ 
+        // db.getCollection('grocery_list').find( {$or : [{"name" : /Sally/}, {"brand" : /Sally/}]})       
 
-        //console.log("[", (new Date).toTimeString(), "]");
-        //console.log("search for ", where);
-        //console.log("limit: %s, sort: %s, skip: %s", limit, sortBy, offset)
-
-        grocery_list.find(where)
+        grocery_list.find(or)
             .limit(limit)
             .sort({ order: sortBy })
             .skip(offset)
@@ -51,30 +49,31 @@ module.exports = function (app, conn) {
     });
 
     app.get("/api/products/sum", function (req, res) {
+
+        var query = (req.query.keyword).replace(new RegExp(' ', 'g'), '*');
+        var searchType = req.query.searchType || ['Brand', 'Name'];
         //console.log("sum of all Groceries");
         //console.log("keyword: ", req.query.keyword);
         //console.log("!!!searchType: ", req.query.searchType);
 
         //if (req.query.keyword) var where = null;
-        if (req.query.keyword == '') var where = null;
-        else if (req.query.searchType) {
-            or = [];
-            if (req.query.searchType.includes('Brand')) or.push({ brand: "/" + req.query.keyword + "/" });
-            if (req.query.searchType.includes('Name')) or.push({ name: "/" + req.query.keyword + "/" });
-            var where = {
-                where: {
-                    $or: or
-                }
-            }
+        if (req.query.keyword == '' || req.query.searchType == '') var where = null;
+        else {
+            var or = {$or : []};
+            if (searchType.includes('Brand')) or.$or.push({"brand" : new RegExp(query, 'i')});
+            if (searchType.includes('Name')) or.$or.push({"name" : new RegExp(query, 'i')});
         }
 
-        grocery_list.find(where).count()
+        
+        grocery_list.find(or).count()
             .then(function (result, err) {
-                //console.log(result ? result : err);
+                console.log(result ? result : err);
                 if (err) res.status(400).json(err);
                 else if (result) res.status(200).send(result.toString());
                 else res.status(400).send("no records found...");
             });
+
+        
     });
 
     app.get("/api/products/exist/:upc12", function (req, res) {
@@ -94,8 +93,8 @@ module.exports = function (app, conn) {
         console.log(" is exist Grocery");
         console.log("id: ", req.params.productId)
 
-        grocery_list.findOne({ id: parseInt(req.params.productId) })
-            .then(function (err, result) {
+        grocery_list.findOne({ 'id': parseInt(req.params.productId) })
+            .then(function (result, err) {
                 //console.log("error: ", err);
                 //console.log("result: ", res);
                 //console.log(result ? result : err);
@@ -118,7 +117,7 @@ module.exports = function (app, conn) {
                 }
                 , $currentDate: { lastModified: true }
             })
-            .then(function (err, result) {
+            .then(function (result, err) {
                 //console.log(result ? result : err);
                 if (err) res.status(400).send(err);
                 else if (result) res.status(200).json(result);
@@ -134,7 +133,7 @@ module.exports = function (app, conn) {
             brand: req.body.brand,
             upc12: parseInt(req.body.upc12)
         })
-            .then(function (err, result) {
+            .then(function (result, err) {
                 //console.log(result ? result : err);
                 if (err) res.status(400).send(err);
                 else if (result) res.status(200).json(result);
@@ -149,7 +148,7 @@ module.exports = function (app, conn) {
         db.collection('inventory').deleteOne({
             id: req.params.productId
         })
-            .then(function (err, result) {
+            .then(function (result, err) {
                 //console.log(result ? result : err);
                 if (err) res.status(400).send(err);
                 else if (result) res.status(200).json(result);
